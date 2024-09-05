@@ -1,5 +1,5 @@
 import React, { useState, ErrorInfo, ReactNode } from "react";
-import { LiveProvider, LiveEditor, LiveError, LivePreview } from "react-live";
+import "./App.css";
 import * as DS from "@nlmk/ds-2.0";
 import * as Babel from "@babel/standalone";
 
@@ -40,7 +40,9 @@ const App = () => {
   const [Component, setComponent] = useState<React.FC | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleChange = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     setCode(event.target.value);
     setError(null);
   };
@@ -87,27 +89,29 @@ const App = () => {
   return (
     <div className="App">
       <div className="input-container">
-        <textarea
+        <DS.Input
+          multiline
+          resize
+          label="Введите код компонента / Write code component"
           value={code}
           onChange={handleChange}
           placeholder="Введите JSX код здесь"
         />
-        <button onClick={handleRender}>Render</button>
+        <DS.Button onClick={handleRender}>Render</DS.Button>
       </div>
       <div className="generated-ui">
         {error ? (
-          <div
-            className="error-message"
-            style={{ color: "red", marginTop: "10px" }}
-          >
+          <DS.Typography color="error">
             Ошибка компиляции: {error}
-          </div>
+          </DS.Typography>
         ) : Component ? (
           <ErrorBoundary>
             <Component />
           </ErrorBoundary>
         ) : (
-          <p>Введите корректный JSX код и нажмите "Render"</p>
+          <DS.Typography>
+            Введите корректный JSX код и нажмите "Render"
+          </DS.Typography>
         )}
       </div>
     </div>
