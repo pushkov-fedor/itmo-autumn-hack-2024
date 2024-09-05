@@ -79,7 +79,11 @@ const Main = () => {
       const codeWithReactImport = `import React from "react";\n${code}`;
 
       const transformedCode = Babel.transform(codeWithReactImport, {
-        presets: ["env", "react"],
+        presets: [
+          "env",
+          "react",
+          ["typescript", { isTSX: true, allExtensions: true }],
+        ],
         plugins: [
           "proposal-class-properties",
           "proposal-object-rest-spread",
