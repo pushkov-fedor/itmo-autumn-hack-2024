@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/itmo-autumn-hack-2024/static/css/main.e89e5058.css",
+    "main.js": "/itmo-autumn-hack-2024/static/js/main.3fc59a77.js",
+    "static/js/453.43bb9325.chunk.js": "/itmo-autumn-hack-2024/static/js/453.43bb9325.chunk.js",
+    "index.html": "/itmo-autumn-hack-2024/index.html",
+    "main.e89e5058.css.map": "/itmo-autumn-hack-2024/static/css/main.e89e5058.css.map",
+    "main.3fc59a77.js.map": "/itmo-autumn-hack-2024/static/js/main.3fc59a77.js.map",
+    "453.43bb9325.chunk.js.map": "/itmo-autumn-hack-2024/static/js/453.43bb9325.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.e89e5058.css",
+    "static/js/main.3fc59a77.js"
+  ]
+}
