@@ -141,7 +141,9 @@ const Main = () => {
           </DS.Typography>
         ) : Component ? (
           <ErrorBoundary>
-            <Component />
+            <div>
+              <Component />
+            </div>
           </ErrorBoundary>
         ) : (
           <DS.Typography>
