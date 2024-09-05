@@ -35,7 +35,34 @@ class ErrorBoundary extends React.Component<
   }
 }
 
-const App = () => {
+const customExportDefaultPlugin = ({
+  types: t,
+}: {
+  types: typeof Babel.types;
+}) => ({
+  visitor: {
+    ExportDefaultDeclaration(path: any) {
+      const declaration = path.get("declaration");
+      if (declaration.isAssignmentExpression()) {
+        const left = declaration.get("left");
+        const right = declaration.get("right");
+        if (
+          left.isIdentifier() &&
+          (right.isArrowFunctionExpression() || right.isFunctionExpression())
+        ) {
+          // Transform `export default App = () => (...)` to `const App = () => (...); export default App;`
+          const variableDeclaration = t.variableDeclaration("const", [
+            t.variableDeclarator(left.node, right.node),
+          ]);
+          const exportDefault = t.exportDefaultDeclaration(left.node);
+          path.replaceWithMultiple([variableDeclaration, exportDefault]);
+        }
+      }
+    },
+  },
+});
+
+const Main = () => {
   const [code, setCode] = useState("");
   const [Component, setComponent] = useState<React.FC | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -49,35 +76,39 @@ const App = () => {
 
   const handleRender = () => {
     try {
-      let processedCode = code.replace(
-        /export\s+default\s+(\w+)\s*=\s*(\(\s*\)\s*=>\s*\(?\s*<)/,
-        (match, name) => `const ${name} = () => (\n<`
-      );
-      const componentName =
-        processedCode.match(/const\s+(\w+)\s*=/)?.[1] || "App";
-      processedCode += `\nexport default ${componentName};`;
-
-      const codeWithReactImport = `import React from "react";\n${processedCode}`;
+      const codeWithReactImport = `import React from "react";\n${code}`;
 
       const transformedCode = Babel.transform(codeWithReactImport, {
-        presets: [["env", { modules: "commonjs" }], "react"],
-        plugins: ["proposal-class-properties", "proposal-object-rest-spread"],
+        presets: ["env", "react"],
+        plugins: [
+          "proposal-class-properties",
+          "proposal-object-rest-spread",
+          customExportDefaultPlugin,
+        ],
       }).code;
 
-      const module = { exports: { default: null } };
+      // Explicitly type module.exports to include the default property
+      const module: { exports: { default: React.FC | null } } = {
+        exports: { default: null },
+      };
       const require = (name: string) => {
         if (name === "react") return React;
         if (name === "@nlmk/ds-2.0") return DS;
         throw new Error(`Module not found: ${name}`);
       };
 
-      eval(`
-        (function(require, module, exports) {
-          ${transformedCode}
-        })(require, module, module.exports);
-      `);
+      console.log(transformedCode);
 
-      setComponent(() => module.exports.default);
+      eval(
+        `(function(require, module, exports) { ${transformedCode} })(require, module, module.exports);`
+      );
+
+      const ExportedComponent = module.exports.default;
+      if (typeof ExportedComponent !== "function") {
+        throw new Error("Exported component is not a valid React component");
+      }
+
+      setComponent(() => ExportedComponent);
       setError(null);
     } catch (error) {
       console.error("Invalid code:", error);
@@ -118,4 +149,4 @@ const App = () => {
   );
 };
 
-export default App;
+export default Main;
